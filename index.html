@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pokémon TCG Browser</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══ AUTH SCREEN ═══ -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">⚡ POKÉMON TCG</div>
+    <div class="auth-sub">Browse & manage your card collection</div>
+
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+      <button class="tab-btn"        onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="loginPanel" class="form-panel active">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="your@email.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••">
+      </div>
+      <button class="auth-btn" id="loginBtn" onclick="doLogin()">Login</button>
+      <div id="loginMsg" class="msg"></div>
+    </div>
+
+    <!-- SIGNUP -->
+    <div id="signupPanel" class="form-panel">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="signupName" placeholder="Ash Ketchum">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="signupEmail" placeholder="your@email.com">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="signupPassword" placeholder="Min. 6 characters">
+      </div>
+      <div class="field">
+        <label>Confirm Password</label>
+        <input type="password" id="signupConfirm" placeholder="Repeat password">
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="termsBox">
+        <label for="termsBox">I agree to the <span style="color:var(--gold);text-decoration:underline;cursor:pointer">terms and conditions</span></label>
+      </div>
+      <button class="auth-btn" id="signupBtn" onclick="doSignup()">Create Account</button>
+      <div id="signupMsg" class="msg"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ═══ -->
+<div id="mainApp">
+
+  <!-- NAV -->
+  <nav class="navbar">
+    <div class="nav-logo" onclick="goPage('home')">⚡ POKÉMON TCG</div>
+    <div class="nav-links">
+      <button class="nav-link active" data-page="home"    onclick="goPage('home')">Home</button>
+      <button class="nav-link"        data-page="about"   onclick="goPage('about')">About</button>
+      <button class="nav-link"        data-page="contact" onclick="goPage('contact')">Contact</button>
+      <button class="nav-link"        data-page="profile" onclick="goPage('profile')">Profile</button>
+    </div>
+    <div class="nav-right">
+      <div class="avatar" id="navAvatar" onclick="goPage('profile')">U</div>
+      <span class="user-name" id="navName">Trainer</span>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- HOME PAGE -->
+  <div id="page-home" class="page active">
+    <div class="hero">
+      <h1>⚡ POKÉMON TCG BROWSER ⚡</h1>
+      <p>Search, collect & compare Pokémon Trading Cards</p>
+      <div class="search-row">
+        <input type="text" id="searchInput" placeholder="Search Pokémon name…" onkeydown="if(event.key==='Enter')doSearch()">
+        <button class="btn btn-gold" onclick="doSearch()">Search</button>
+        <button class="btn btn-blue" onclick="loadCards()">Browse All</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <span class="filter-label">Type:</span>
+      <select id="typeFilter" onchange="applyFilters()">
+        <option value="">All Types</option>
+        <option>Grass</option><option>Fire</option><option>Water</option>
+        <option>Lightning</option><option>Psychic</option><option>Fighting</option>
+        <option>Darkness</option><option>Metal</option><option>Dragon</option><option>Colorless</option>
+      </select>
+      <span class="filter-label">Rarity:</span>
+      <select id="rarityFilter" onchange="applyFilters()">
+        <option value="">All Rarities</option>
+        <option>Common</option><option>Uncommon</option><option>Rare</option>
+        <option>Rare Holo</option><option>Rare Holo EX</option><option>Rare Ultra</option>
+      </select>
+      <span class="filter-label">Sort:</span>
+      <select id="sortFilter" onchange="applyFilters()">
+        <option value="name">Name</option>
+        <option value="power">Power</option>
+        <option value="value">Value</option>
+        <option value="hp">HP</option>
+      </select>
+      <div class="toggle-wrap" onclick="toggleCollection()">
+        <div class="toggle" id="collToggle"></div>
+        <span class="filter-label" id="collLabel">My Collection</span>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-lbl">Cards Shown</div><div class="stat-val" id="statTotal">0</div></div>
+      <div class="stat-box"><div class="stat-lbl">Avg Power</div><div class="stat-val" id="statPower">0</div></div>
+      <div class="stat-box"><div class="stat-lbl">In Collection</div><div class="stat-val" id="statCollected">0</div></div>
+      <div class="stat-box"><div class="stat-lbl">Strongest</div><div class="stat-val" id="statStrongest" style="font-size:1rem">–</div></div>
+    </div>
+
+    <div id="cardsGrid" class="cards-grid"></div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <!-- ABOUT PAGE -->
+  <div id="page-about" class="page">
+    <div class="page-title">About</div>
+    <p style="text-align:center;color:var(--muted);max-width:600px;margin:0 auto 30px;line-height:1.8">
+      The ultimate Pokémon TCG browser. Explore thousands of cards, build your collection, compare stats and track your progress.
+    </p>
+    <div class="about-grid">
+      <div class="feature-card"><div class="feature-icon">⚡</div><h3>Power Scoring</h3><p>Every card gets a power score based on HP, attack damage and rarity.</p></div>
+      <div class="feature-card"><div class="feature-icon">🔍</div><h3>Smart Search</h3><p>Find any card instantly with filters by type, rarity, and sorting options.</p></div>
+      <div class="feature-card"><div class="feature-icon">📦</div><h3>Collection Manager</h3><p>Track which cards you own and view your collection stats at a glance.</p></div>
+      <div class="feature-card"><div class="feature-icon">💾</div><h3>Local Storage</h3><p>Your collection and account are saved in your browser — private and secure.</p></div>
+    </div>
+  </div>
+
+  <!-- CONTACT PAGE -->
+  <div id="page-contact" class="page">
+    <div class="page-title">Contact Us</div>
+    <div class="contact-form">
+      <div class="field"><label>Name</label><input type="text" id="cName" placeholder="Your name"></div>
+      <div class="field"><label>Email</label><input type="email" id="cEmail" placeholder="your@email.com"></div>
+      <div class="field"><label>Subject</label><input type="text" id="cSubject" placeholder="What's this about?"></div>
+      <div class="field"><label>Message</label><textarea id="cMessage" placeholder="Tell us anything…"></textarea></div>
+      <button class="btn btn-gold" style="width:100%;margin-top:6px" onclick="sendContact()">Send Message</button>
+    </div>
+  </div>
+
+  <!-- PROFILE PAGE -->
+  <div id="page-profile" class="page">
+    <div class="page-title">Profile</div>
+    <div class="profile-header">
+      <div class="profile-avatar" id="profileAvatar">U</div>
+      <div class="profile-name" id="profileName">Trainer</div>
+      <div class="profile-email" id="profileEmail">–</div>
+    </div>
+    <div class="profile-grid">
+      <div class="profile-card">
+        <h3>Account Info</h3>
+        <div class="info-row"><span class="info-label">Member Since</span><span class="info-val" id="pSince">–</span></div>
+        <div class="info-row"><span class="info-label">Total Logins</span><span class="info-val" id="pLogins">–</span></div>
+        <div class="info-row"><span class="info-label">Last Login</span><span class="info-val" id="pLast">–</span></div>
+      </div>
+      <div class="profile-card">
+        <h3>Collection</h3>
+        <div class="info-row"><span class="info-label">Cards Collected</span><span class="info-val" id="pCards">0</span></div>
+        <div class="info-row"><span class="info-label">Est. Total Value</span><span class="info-val" id="pValue">$0.00</span></div>
+        <div class="info-row"><span class="info-label">Avg Power Score</span><span class="info-val" id="pPower">0</span></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /mainApp -->
+
+<!-- CARD MODAL -->
+<div class="overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toasts" id="toasts"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
